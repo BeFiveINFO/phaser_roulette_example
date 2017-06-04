@@ -1,6 +1,6 @@
 # Phaser Roulette Example
 
-![](http://befiveinfo.github.io/images/shared/roulette-experiment/roulette_thumbnail.png =250x)
+![](http://befiveinfo.github.io/images/shared/roulette-experiment/roulette_thumbnail.png=250x)
 
 This [Phaser JS](https://phaser.io/) script demonstartes a solution to show roulette that rotates and stops at a random position. Needle ticks with animation and sound as the roulette spins.
 
