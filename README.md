@@ -9,6 +9,7 @@ The script itself could be rewritten into a really simple code and should be abl
 # Application
 Games made based on this demo script can be found at:
 - [Dealer Ginjirou](http://play.befive.info/dealer-ginjirou/)
+  - ![](https://raw.githubusercontent.com/BeFiveINFO/BeFiveINFO.github.io/master/images/shared/roulette-experiment/dealer_ginjirou_gamescreen_thumbnail.png)
   - The game uses a single PNG with transparent for the spin wheel discs.
 
 # License
