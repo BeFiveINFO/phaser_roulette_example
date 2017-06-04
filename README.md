@@ -10,7 +10,7 @@ The script itself could be rewritten into a really simple code and should be abl
 
 1. Make a directory in your web server and copy the content into it.
 2. Open http:://yourserver/the_directory_of_your_choice/index.html in your browser
-- Note: You can download, thaw the archive and open index.html by double clicking on it to try the demo. But you will not hear any sound because of CORS issue (please [see here](http://www.html5gamedevs.com/topic/6459-newbie-struggling-with-cors-issues/) for more info).
+- Note: You can still try the demo by simply double clicking index.html in your computer's desktop. But you will not hear any sound because of CORS issue (please [see here](http://www.html5gamedevs.com/topic/6459-newbie-struggling-with-cors-issues/) for more info).
 
 # Application
 Games made with a roulette system based on this demo script can be found at:
