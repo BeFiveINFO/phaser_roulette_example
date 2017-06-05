@@ -6,6 +6,10 @@ This [Phaser JS](https://phaser.io/) script demonstartes a solution to show roul
 
 The script itself could be rewritten into a really simple code and should be able to be integrate into any game at ease. You could use it for a simple game, a small lottery in your game, board games etc.
 
+## Online Demo
+
+Online demo is available at [this website](http://befive.info/phaser_roulette_example/).
+
 ## To try this script
 
 1. Make a directory in your web server and copy the content into it.
