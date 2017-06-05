@@ -22,7 +22,7 @@ var pockets_group;
 var angleAccum = 0;
 var angleBefore = 0;
 var angleDiff = 0;
-var debugAngle;
+var reelHasSlowedDown = false;
 var currentPocket;
 var previousPocketNum;
 var needle;
@@ -117,7 +117,9 @@ function update () {
 			needleTween = game.add.tween(needle).to( { angle: 10 }, 200, Phaser.Easing.Cubic.InOut, true);
 			pocketChanged = -1;
 		} else {
-			tickSound.play();
+			if(reelHasSlowedDown === true){
+				tickSound.play();
+			}
 			needle.angle = -10;
 			needleTween = game.add.tween(needle).to( { angle: 0 }, 100, Phaser.Easing.Bounce.Out, true);
 			pocketChanged = -1;
@@ -142,6 +144,7 @@ function spinWheelRight() {
 function spinWheel() {
 	if (spinState === true) return;
 	spinState = true;
+	reelHasSlowedDown = false;
 	angleBefore = pockets_group.angle;
 	var rand_angle = Math.floor(Math.random() * 360);
 	var rand_time = Math.floor(Math.random() * 2000);
@@ -150,6 +153,9 @@ function spinWheel() {
 		angle: 1080 + rand_angle
 	}, 11000 + rand_time, function(k) {
 		getCurrentPocket();
+		if(k > 0.5 && reelHasSlowedDown === false) {
+			reelHasSlowedDown = true;
+		}
 		return --k * k * k + 1;
 	}, true);
 
