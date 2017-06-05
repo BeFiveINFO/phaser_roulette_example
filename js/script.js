@@ -10,7 +10,7 @@
  * The following code at least works and demonstrates as written in the read me.
  */
 
-var game = new Phaser.Game(644,960,Phaser.CANVAS,'gameContainer', { preload: preload, create: create, update: update} );
+var game = new Phaser.Game(600,600,Phaser.CANVAS,'gameContainer', { preload: preload, create: create, update: update} );
 
 var loadingLabel;
 var tickSound;
@@ -19,6 +19,7 @@ var spinState = false;
 var pocket_sprite = [];
 var pocket_sprite_label = [];
 var pockets_group;
+var roulette_unit_group;
 var angleAccum = 0;
 var angleBefore = 0;
 var angleDiff = 0;
@@ -51,6 +52,8 @@ function create () {
 	game.stage.setBackgroundColor('#000');
 	game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
 
+	roulette_unit_group = game.add.group();
+
 	tickSound = game.add.audio('tick');
 	tickSound.allowMultiple = true;
 	pockets_group = game.add.group();
@@ -82,15 +85,23 @@ function create () {
 		set_pocket_coords_rotation(_i);
 	}
 
+	roulette_unit_group.add(pockets_group);
+
 	// instruction
-	var _text_inst = game.add.text(10, 700, '', labelStyle);
-	_text_inst.setText('Hit SPACEBAR or\nClick on screen to Spin');
+	// var _text_inst = game.add.text(10, 700, '', labelStyle);
+	//_text_inst.setText('Hit SPACEBAR or\nClick on screen to Spin');
 	// text showing current poket and index of pocket_bets
-	currentPocket = game.add.text(10, 650, '0', labelStyle);
+	labelStyle.font = "bold 128px Arial";
+	currentPocketDisplay = game.add.text(0, 0, '0', labelStyle);
+	currentPocketDisplay.setTextBounds(0, 200, 595, 230);
+	roulette_unit_group.add(currentPocketDisplay);
+
 	// needle
 	needle = game.add.sprite(298, 20, 'needle');
 	needle.scale.set(0.27);
 	needle.anchor.setTo(0.5, 0);
+	roulette_unit_group.add(needle);
+
 
 	getCurrentPocket();
 	var key1 = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -118,7 +129,7 @@ function update () {
 			pocketChanged = -1;
 		} else {
 			if(reelHasSlowedDown === true){
-				tickSound.play();
+				tickSound.play('',0,1,false);
 			}
 			needle.angle = -10;
 			needleTween = game.add.tween(needle).to( { angle: 0 }, 100, Phaser.Easing.Bounce.Out, true);
@@ -145,6 +156,9 @@ function spinWheel() {
 	if (spinState === true) return;
 	spinState = true;
 	reelHasSlowedDown = false;
+	// start play sound in loop
+	tickSound.play('',0,1,true);
+
 	angleBefore = pockets_group.angle;
 	var rand_angle = Math.floor(Math.random() * 360);
 	var rand_time = Math.floor(Math.random() * 2000);
@@ -153,8 +167,10 @@ function spinWheel() {
 		angle: 1080 + rand_angle
 	}, 11000 + rand_time, function(k) {
 		getCurrentPocket();
-		if(k > 0.5 && reelHasSlowedDown === false) {
+		if(k > 0.54 && reelHasSlowedDown === false) {
 			reelHasSlowedDown = true;
+			// stop playing the sound once
+			tickSound.stop();
 		}
 		return --k * k * k + 1;
 	}, true);
@@ -180,7 +196,8 @@ function getCurrentPocket() {
   	pocketChanged = _currentAngle % 10;
   }
   previousPocketNum = _currentPocketNum;
-  currentPocket.setText(_currentPocketNum + ' / ' + pocket_bets[_currentPocketNum]);
+  // _currentPocketNum an array index number for pocket_bets
+  currentPocketDisplay.setText(pocket_bets[_currentPocketNum]);
 }
 //
 function rotate_sprite($_target, turn_angle) {
