@@ -10,216 +10,107 @@
  * The following code at least works and demonstrates as written in the read me.
  */
 
-var game = new Phaser.Game(600,600,Phaser.CANVAS,'gameContainer', { preload: preload, create: create, update: update} );
+var Game = new Phaser.Game(600,600,Phaser.CANVAS,'gameContainer', { preload: preload, create: create, update: update} );
 
-var loadingLabel;
 var tickSound;
-var shortNoize;
-var spinState = false;
-var pocket_sprite = [];
-var pocket_sprite_label = [];
-var pockets_group;
-var roulette_unit_group;
-var angleAccum = 0;
-var angleBefore = 0;
-var angleDiff = 0;
-var reelHasSlowedDown = false;
-var currentPocket;
-var previousPocketNum;
-var needle;
-var needleTween;
-var labelStyle = {
-	font: "bold 52px Arial",
-	fill: "#fff",
-	boundsAlignH: "center",
-	boundsAlignV: "middle"
-};
-
-var pocketChanged = 0;
-
-var pocket_bets = ['2', '6', '2', '4', '10', '2', '4', '6', '0', '4', '8', '2', '6', '2', '4', '2', '10', '2', '6', '4', '2', '6', '2', '8', '2', '4', '0', '30', '2', '8', '4', '2', '10', '2', '4', '8'];
+var currentPocketDisplay;
 
 function preload () {
-	loadingLabel = game.add.text(80, 150, 'loading...', {font: '30px Courier', fill: '#fff'});
-	game.load.image('pocket_black', 'images/pocket_black.png');
-	game.load.image('pocket_red', 'images/pocket_red.png');
-	game.load.image('needle', 'images/needle.png');
-	game.load.audio('tick', 'sound/waka.wav');
+	loadingLabel = Game.add.text(80, 150, 'loading...', {font: '30px Courier', fill: '#fff'});
+	Game.load.image('pocket_black', 'images/pocket_black.png');
+	Game.load.image('pocket_red', 'images/pocket_red.png');
+	Game.load.image('needle', 'images/needle.png');
+	Game.load.audio('tick', 'sound/waka.wav');
 }
 
 function create () {
 	loadingLabel.destroy();
-	game.stage.setBackgroundColor('#000');
-	game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+	Game.stage.setBackgroundColor('#777777');
+	Game.time.advancedTiming = true;
+	Game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
 
-	roulette_unit_group = game.add.group();
-
-	tickSound = game.add.audio('tick');
+	/**
+	 * Required Instances
+	 */
+	tickSound = Game.add.audio('tick');
 	tickSound.allowMultiple = true;
-	pockets_group = game.add.group();
-	pockets_group.x = 300;
-	pockets_group.y = 300;
-	pockets_group.scale.set(0.5);
-	game.time.advancedTiming = true;
-	game.stage.backgroundColor = '#777777';
-	var _pocketType = ['pocket_red', 'pocket_black'];
-	var _pocketSelector = 0;
-	//	Here we add a Sprite to the display list
-	for (var _i = 0; _i < 36; _i++) {
-		if (_i % 2 == 0) {
-			_pocketSelector = 0;
-		} else {
-			_pocketSelector = 1;
-		}
-		pocket_sprite[_i] = game.add.sprite(30 * _i, 20, _pocketType[_pocketSelector]);
-		pocket_sprite[_i].anchor.setTo(1, 0);
-		pockets_group.add(pocket_sprite[_i]);
-	}
 
-	for (var _i = 0; _i < 36; _i++) {
-		pocket_sprite_label[_i] = game.add.text(30 * _i, 20, _i, labelStyle);
-		pocket_sprite_label[_i].setText(pocket_bets[_i]);
-		// pocket_sprite_label[_i].setText(_i);
-		pocket_sprite_label[_i].anchor.setTo(0.5);
-		pockets_group.add(pocket_sprite_label[_i]);
-		set_pocket_coords_rotation(_i);
-	}
-
-	roulette_unit_group.add(pockets_group);
-
-	// instruction
-	// var _text_inst = game.add.text(10, 700, '', labelStyle);
-	//_text_inst.setText('Hit SPACEBAR or\nClick on screen to Spin');
-	// text showing current poket and index of pocket_bets
-	labelStyle.font = "bold 128px Arial";
-	currentPocketDisplay = game.add.text(0, 0, '0', labelStyle);
+	/**
+	 * For debugging
+	 */
+	currentPocketDisplay = Game.add.text(0, 0, '0', {font:"bold 128px Arial",fill: "#fff",boundsAlignH: "center",boundsAlignV: "middle"});
 	currentPocketDisplay.setTextBounds(0, 200, 595, 230);
-	roulette_unit_group.add(currentPocketDisplay);
 
-	// needle
-	needle = game.add.sprite(298, 20, 'needle');
-	needle.scale.set(0.27);
-	needle.anchor.setTo(0.5, 0);
-	roulette_unit_group.add(needle);
+	/**
+	 * Events
+	 */
+	PCB.event.add('rouletteInitialized',function() {
+	});
+	PCB.event.add('reelSpinStarted',function() {
+		tickSound.play('',0,1,true);
+	});
+	PCB.event.add('reelCountDownStarted',function() {
+		tickSound.stop();
+	});
+	PCB.event.add('currentPocketChanged',function() {
 
+	});
+	PCB.event.add('currentPocketChangedAfterCountDown',function() {
+		tickSound.play('',0,1,false);
+		outputCurrentStop();
+	});
+	PCB.event.add('currentPocketChangedBeforeCountDown',function() {
+		outputCurrentStop();
+	});
+	PCB.event.add('pocketChangedAtLastMoment',function() {
+		tickSound.play('',0,1,false);
+	});
+	PCB.event.add('onCompleteSpinReel',function() {
+		outputCurrentStop();
+	});
 
-	getCurrentPocket();
-	var key1 = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-	key1.onDown.add(spinWheel, this);
+	/**
+	 * Init roulette
+	 */
+	rouletteModule.init('main');
 
-	var key2 = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
-	key2.onDown.add(spinWheelLeft, this);
-
-	var key3 = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
-	key3.onDown.add(spinWheelRight, this);
+	/**
+	 * Key Events
+	 */
+	var key1 = Game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+	key1.onDown.add(function() { rouletteModule.spinRoulette('main');} , this);
+	// nudge the disc to left
+	var key2 = Game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+	key2.onDown.add(function() {
+		var $_rouletteUnit = rouletteModule.rouletteUnits.main;
+		$_rouletteUnit.disc.angle--;
+		$_rouletteUnit.needle.angle = 0;
+		rouletteModule._getCurrentStopID('main',true);
+		outputCurrentStop();
+	}, this);
+	// nudge the disc to right
+	var key3 = Game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+	key3.onDown.add(function() {
+		var $_rouletteUnit = rouletteModule.rouletteUnits.main;
+		$_rouletteUnit.disc.angle++;
+		$_rouletteUnit.needle.angle = 0;
+		rouletteModule._getCurrentStopID('main',true);
+		outputCurrentStop();
+	}, this);
 
 	// mouse input
 	var _click = (window.ontouchstart === undefined)? 'click' : 'touchstart';
-	game.canvas.addEventListener(_click, function () {
-		spinWheel();
+	Game.canvas.addEventListener(_click, function () {
+		rouletteModule.spinRoulette('main');
 	});
 }
 
 function update () {
-	if(pocketChanged >= 0) {
-		if (spinState == false && pocketChanged == 0) {
-			tickSound.play();
-			needle.angle = 0;
-			needleTween = game.add.tween(needle).to( { angle: 10 }, 200, Phaser.Easing.Cubic.InOut, true);
-			pocketChanged = -1;
-		} else {
-			if(reelHasSlowedDown === true){
-				tickSound.play('',0,1,false);
-			}
-			needle.angle = -10;
-			needleTween = game.add.tween(needle).to( { angle: 0 }, 100, Phaser.Easing.Bounce.Out, true);
-			pocketChanged = -1;
-		}
-	}
 }
 
-
-function spinWheelLeft() {
-	pockets_group.angle--;
-	needle.angle = 0;
-	getCurrentPocket();
+function outputCurrentStop(){
+	var $_targetUnit = rouletteModule.rouletteUnits.main;
+	var _pocketIndex = $_targetUnit.currentStop;
+	currentPocketDisplay.setText($_targetUnit.pocketBetStrip[_pocketIndex]);
 }
 
-function spinWheelRight() {
-	pockets_group.angle++;
-	needle.angle = 0;
-	getCurrentPocket();
-}
-
-
-function spinWheel() {
-	if (spinState === true) return;
-	spinState = true;
-	reelHasSlowedDown = false;
-	// start play sound in loop
-	tickSound.play('',0,1,true);
-
-	angleBefore = pockets_group.angle;
-	var rand_angle = Math.floor(Math.random() * 360);
-	var rand_time = Math.floor(Math.random() * 2000);
-	rand_time -= 1000;
-	var _tween = game.add.tween(pockets_group).to({
-		angle: 1080 + rand_angle
-	}, 11000 + rand_time, function(k) {
-		getCurrentPocket();
-		if(k > 0.54 && reelHasSlowedDown === false) {
-			reelHasSlowedDown = true;
-			// stop playing the sound once
-			tickSound.stop();
-		}
-		return --k * k * k + 1;
-	}, true);
-
-	_tween.onComplete.add(doSomething, this);
-
-	function doSomething() {
-	// reset once to the degree under 360
-		pockets_group.angle = Math.ceil(pockets_group.angle % 360);
-		angleAccum = 0;
-		angleBefore = 0;
-		angleDiff = 0;
-		spinState = false;
-		getCurrentPocket();
-	}
-}
-
-function getCurrentPocket() {
-  var _currentAngle = Math.floor((pockets_group.angle + 90) % 360); // at the top
-  var _currentPocketNum = 35 - Math.floor(_currentAngle / 10);
-  // pocket_bets
-  if (previousPocketNum != _currentPocketNum) {
-  	pocketChanged = _currentAngle % 10;
-  }
-  previousPocketNum = _currentPocketNum;
-  // _currentPocketNum an array index number for pocket_bets
-  currentPocketDisplay.setText(pocket_bets[_currentPocketNum]);
-}
-//
-function rotate_sprite($_target, turn_angle) {
-	var _current_angle = $_target.angle;
-	$_target.angle = _current_angle + turn_angle;
-}
-
-function set_pocket_coords_rotation(pocketNumber, pocketLabel) {
-	var item_num = 36;
-	var deg = 360.0 / item_num;
-	var red = (deg * Math.PI / 180.0);
-	var circle_r = 100 * 5.2;
-	var x = Math.cos(red * pocketNumber) * circle_r + circle_r;
-	var y = Math.sin(red * pocketNumber) * circle_r + circle_r
-	pocket_sprite[pocketNumber].x = x - circle_r;
-	pocket_sprite[pocketNumber].y = y - circle_r;
-	pocket_sprite[pocketNumber].angle = (deg * pocketNumber) + 80;
-  // label
-  circle_r = 100 * 4.5;
-  x = Math.cos(red * (pocketNumber + 0.4)) * circle_r + circle_r;
-  y = Math.sin(red * (pocketNumber + 0.4)) * circle_r + circle_r;
-  pocket_sprite_label[pocketNumber].x = x - circle_r;
-  pocket_sprite_label[pocketNumber].y = y - circle_r;
-  pocket_sprite_label[pocketNumber].angle = (deg * pocketNumber) + 94;
-}
