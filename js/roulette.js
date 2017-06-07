@@ -4,6 +4,7 @@
  * @license      {@link http://opensource.org/licenses/MIT}
  *
  * Available events:
+ * 					rouletteInitialized
  * 					currentPocketChanged
 					currentPocketChangedAfterCountDown
 					currentPocketChangedBeforeCountDown
