@@ -92,6 +92,8 @@ var rouletteModule = {
 		_tween.onComplete.add(_findFinalResult, this);
 
 		function _findFinalResult() {
+			// reset once to the degree under 360
+			$_targetDisc.angle = $_targetDisc.angle % 360;
 			$_currentRouletteUnit.isSpinning = false;
 			$_currentRouletteUnit.reelCountDownStarted = false;
 			_self._getCurrentStopID(rouletteID,true);
