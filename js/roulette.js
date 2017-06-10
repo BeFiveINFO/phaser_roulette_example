@@ -40,10 +40,13 @@ var rouletteModule = {
 	  * @param      {string}  rouletteID       The roulette id
 	  * @param      {array}   pocketBetStrip    The pocket bet strip (optional)
 	  */
-	init: function (rouletteID,pocketBetStrip) {
+	init: function (rouletteID,pocketBetStrip,labelStyle) {
 		if(!rouletteID) {
 			console.log('No ID specified.');
 			return false;
+		}
+		if(labelStyle){
+			this.LABEL_STYLE = labelStyle;
 		}
 		pocketBetStrip = pocketBetStrip || ['2', '6', '2', '4', '10', '2', '4', '6', '0', '4', '8', '2', '6', '2', '4', '2', '10', '2', '6', '4', '2', '6', '2', '8', '2', '4', '0', '30', '2', '8', '4', '2', '10', '2', '4', '8'];
 		this._buildRouletteUnit(rouletteID,pocketBetStrip);
