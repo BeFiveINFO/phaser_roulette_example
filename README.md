@@ -21,7 +21,7 @@ Games made with a roulette system based on this demo script can be found at:
 - [Fuji San Roulette (OPEN SOURCE)](https://github.com/BeFiveINFO/fuji-san-roulette)
   - ![](http://befiveinfo.github.io/images/shared/fujisan-roulette/thumbnail.png)
   - This games is made with the Phaser Roulette Example script. Published as an open source.
-- [Dealer Ginjirou (Closed Source)](http://play.befive.info/dealer-ginjirou/)
+- [Dealer Ginjirou (Open Source)](https://github.com/BeFiveINFO/befive-dealer-ginjirou)
   - ![](http://befiveinfo.github.io/images/shared/roulette-experiment/dealer_ginjirou_gamescreen_thumbnail.png)
   - The game uses a single PNG with transparent for the spin wheel discs.
 
